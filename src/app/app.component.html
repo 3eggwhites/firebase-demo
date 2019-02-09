@@ -1,17 +1,18 @@
 <input type="text" #course (keyup.enter)="addObject(course)">
 <ul>
   <li *ngFor="let course of courses$ | async">
-    {{ course }} + {{ course.$key }}
     <button (click) = 'update(course)'>Update</button>
+    {{ course.payload.val() }}
+    <button (click) = 'delete(course)'>Delete</button>
   </li>
 </ul>
 <p>{{ course$ | async | json }}</p>
 <p>{{ author$ | async | json }}</p>
 
 <ul *ngIf="author$ | async as author">
-  <li>{{ author.name }}</li>
-  <li>{{ author.age }}</li>
-  <li>{{ author.sex }}</li>
+  <li>{{ author.payload.val().name }}</li>
+  <li>{{ author.payload.val().age }}</li>
+  <li>{{ author.payload.val().sex }}</li>
 </ul>
 
 <router-outlet></router-outlet>

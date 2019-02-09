@@ -1,5 +1,9 @@
 import { Component, OnDestroy } from '@angular/core';
-import { AngularFireDatabase, AngularFireList } from '@angular/fire/database';
+import {
+  AngularFireDatabase,
+  AngularFireList,
+  DatabaseSnapshot
+} from '@angular/fire/database';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -16,9 +20,9 @@ export class AppComponent {
   coursesList: AngularFireList<{}>;
   // coursesSub: Subscription;
   constructor(private dbase: AngularFireDatabase) {
-    this.courses$ = this.dbase.list('/courses').valueChanges();
-    this.course$ = this.dbase.object('/courses/1').valueChanges();
-    this.author$ = this.dbase.object('/authors/1').valueChanges();
+    this.courses$ = this.dbase.list('/courses').snapshotChanges();
+    this.course$ = this.dbase.object('/courses/1').snapshotChanges();
+    this.author$ = this.dbase.object('/authors/1').snapshotChanges();
     this.coursesList = this.dbase.list('/courses');
     // this.coursesSub = dbase
     //   .list("/courses")
@@ -35,24 +39,36 @@ export class AppComponent {
 
   addObject(course: HTMLInputElement) {
     this.coursesList.push(
-      {
-        name: 'Mosh',
-        age: 42,
-        sex: 'Male',
-        title: 'Mr.',
-        sections: [
-          {title: 'Angular'},
-          {title: 'Web'},
-          {title: 'Development'},
-        ]
-      }
+      course.value
+      // {
+      //   name: 'Mosh',
+      //   age: 42,
+      //   sex: 'Male',
+      //   title: 'Mr.',
+      //   sections: [
+      //     {title: 'Angular'},
+      //     {title: 'Web'},
+      //     {title: 'Development'},
+      //   ]
+      // }
     );
     course.value = '';
   }
 
   update(course) {
-    const itemRef = this.dbase.object('/courses/' + course.$key);
-    itemRef.set(course + ' UPDATED');
+    const itemRef = this.dbase.object('/courses/' + course.payload.key);
+    itemRef.update({ isLive: true, price: 150 });
   }
 
+  delete(course) {
+    this.dbase
+      .object('/courses/' + course.payload.key)
+      .remove()
+      .then(x => {
+        console.log('Deleted');
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
 }
